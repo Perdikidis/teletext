@@ -1,0 +1,2 @@
+# teletext
+prwti fora monos
