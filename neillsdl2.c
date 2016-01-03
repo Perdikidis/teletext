@@ -33,7 +33,7 @@ void Neill_SDL_Init(SDL_Simplewin *sw)
    }
 
    /* Set screen to black */
-   Neill_SDL_SetDrawColour(sw, 0, 0, 0);
+   Neill_SDL_SetDrawColour(sw, 0, 100, 0);
    SDL_RenderClear(sw->renderer);
    SDL_RenderPresent(sw->renderer);
 
@@ -116,7 +116,7 @@ void Neill_SDL_DrawChar(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT],
          if(fontdata[chr-FNT1STCHAR][y] >> (FNTWIDTH - 1 - x) & 1){
             /*printf("*");*/
             /* White Ink */
-            Neill_SDL_SetDrawColour(sw, 255, 255, 255);
+            Neill_SDL_SetDrawColour(sw, 255, 0, 0);
             SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
          }
          else{

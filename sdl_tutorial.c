@@ -1,5 +1,5 @@
 #include <SDL/SDL.h>
-//#include "neillsdl2.h"
+ // #include "neillsdl2.h"
 
 #define TRUE 1
 #define FALSE 0
@@ -15,6 +15,8 @@ int main(void)
    int32_t start, color, color2;
    const int FPS = 30;
    SDL_Rect rect; // auto einai struct tou sdl
+
+
    rect = init_rect(rect);//give coordinates and size
 
    SDL_Init(SDL_INIT_EVERYTHING);
