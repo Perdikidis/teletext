@@ -116,13 +116,13 @@ void Neill_SDL_DrawChar(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT],
          if(fontdata[chr-FNT1STCHAR][y] >> (FNTWIDTH - 1 - x) & 1){
             /*printf("*");*/
             /* White Ink */
-            Neill_SDL_SetDrawColour(sw, 255, 0, 0);
+            Neill_SDL_SetDrawColour(sw, 255, 255, 255);/*γράμματα*/
             SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
          }
          else{
             /*printf(".");*/
             /* Black Ink */
-            Neill_SDL_SetDrawColour(sw, 0, 0, 0);
+            Neill_SDL_SetDrawColour(sw, 0, 0, 0);/*background*/
             SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
          }
       }

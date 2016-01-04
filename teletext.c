@@ -6,7 +6,7 @@ int main(void)
    unsigned char board[HEIGHT][WIDTH];
    int a=20, test=0;
 
-   read_file("lfc.m7.txt", board);
+   read_file("test.m7.txt", board);
    printf("\n\n\nTwra exoume to board\n\n\n\n" );
    print_board(board);
    printf("\n\n\n\n\n" );
@@ -33,6 +33,7 @@ void read_file(char *fileName, unsigned char board[HEIGHT][WIDTH]){
       exit(1);
    }
    for (i=0; i<HEIGHT; i++){
+      printf("\n");
       for (j=0; j<WIDTH; j++){
          items = fread(&board[i][j], sizeof(unsigned char), 1, fp);
          if ( items != 1){
@@ -42,7 +43,7 @@ void read_file(char *fileName, unsigned char board[HEIGHT][WIDTH]){
          if( board[i][j] < 128 ){
             board[i][j] += 128;
          }
-         printf("%d:%c ", board[i][j], board[i][j]-128);
+         printf("%d,", board[i][j]/*, board[i][j]-128)*/);
       }
    }
    fclose(fp);
@@ -51,7 +52,6 @@ void read_file(char *fileName, unsigned char board[HEIGHT][WIDTH]){
 void print_board(unsigned char board[HEIGHT][WIDTH]){
 
    int i, j;
-   /*SDL_Color TextColor = {255,00,00,255};*/
    int32_t color;
    SDL_Simplewin d;
    SDL_Rect rect;
@@ -64,31 +64,11 @@ void print_board(unsigned char board[HEIGHT][WIDTH]){
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
    Neill_SDL_Init(&sw);
    Neill_SDL_ReadFont(fontdata, FNTFILENAME);
-   /*screen = SDL_SetVideoMode(WWIDTH,WHEIGHT,32,SDL_SWSURFACE);*/
-   /*screen = SDL_GetWindowSurface(sw.win);
-
-   printf("mpikame edw\n" );
-   color = SDL_MapRGB( screen->format, 255, 0, 0);
-
-
-
-
-   /*SDL_SetRenderDrawColor(d.renderer, 255, 0, 0, 255);*/
-
    for (i=0; i<HEIGHT; i++){
       printf("\n");
       for (j=0; j<WIDTH; j++){
          if ((int) board[i][j] == 0x81){
             Neill_SDL_DrawChar(&sw, fontdata, 'R', j*FNTWIDTH, 20*i);
-         }
-         else if((int) board[i][j] == 0x91){
-            rect.x = i;
-            rect.y = j;
-            rect.w = FNTWIDTH;
-            rect.h = 20;
-            /*SDL_FillRect(screen, &rect, color);*/
-            Neill_SDL_RenderDrawCircle(sw.renderer, i, j, 10 );
-            Neill_SDL_RenderFillCircle(sw.renderer, i+50, j+50, 10 );
          }
          else{
             Neill_SDL_DrawChar(&sw, fontdata, board[i][j] -128  , j*FNTWIDTH, 20*i);
