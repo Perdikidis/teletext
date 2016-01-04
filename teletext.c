@@ -6,7 +6,7 @@ int main(void)
    Cell board[HEIGHT][WIDTH];
    int a=20, test=0;
 
-   read_file("test.m7.txt", board);
+   read_file("lfc.m7.txt", board);
    set(board);
    printf("\n\n\nTwra exoume to board\n\n\n\n" );
    print_board(board);
