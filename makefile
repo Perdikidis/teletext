@@ -1,7 +1,6 @@
 CFLAGS = `sdl2-config --cflags` -O4 -Wall -Wextra -Wfloat-equal -pedantic -std=c89 -lm -lSDL2_image -lSDL2_mixer -lSDL2_ttf
-INCS = neillsdl2.h
 TARGET = teletext
-SOURCES =  neillsdl2.c $(TARGET).c
+SOURCES = $(TARGET).c
 LIBS =  `sdl2-config --libs`
 CC = gcc
 

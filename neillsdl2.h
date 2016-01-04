@@ -10,7 +10,13 @@ typedef unsigned short fntrow;
 #define FNTHEIGHT 18
 #define FNTCHARS 96
 #define FNT1STCHAR 32
-
+#define REDALPHA 0x81
+#define GREENALPHA 0x82
+#define YELLOWALPHA 0x83
+#define BLUEALPHA 0x84
+#define MAGENTAALPHA 0x85
+#define CYANALPHA 0x86
+#define WHITEALPHA 0x87
 
 #define SDL_8BITCOLOUR 256
 
@@ -24,6 +30,7 @@ struct SDL_Simplewin {
    SDL_Window *win;
    SDL_Renderer *renderer;
 };
+
 typedef struct SDL_Simplewin SDL_Simplewin;
 
 void Neill_SDL_Init(SDL_Simplewin *sw);
