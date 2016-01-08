@@ -1,10 +1,14 @@
 #include "teletext.h"
 
-int main(void)
+int main(int argc, char *argv[])
 {
    Cell board[HEIGHT][WIDTH];
 
-   read_file("lfc.m7.txt", board);
+   if (argc != 2){
+      fprintf(stderr,"you need to give 2 arguments\n");
+      exit(1);
+   }
+   read_file(argv[1], board);
    set_board(board);
    printf("\n\n\nTwra exoume to board\n\n\n\n" );
    print_board(board);
@@ -48,7 +52,8 @@ void set_board( Cell board[HEIGHT][WIDTH]){
 
    for (i=0; i<HEIGHT; i++){
       for (j=0; j<WIDTH; j++){
-         if (j == 0){ /* set default settings in new line */
+         board[i][j] = set_pixels_zero(board[i][j]);
+         if (j == 0){ /* set default settings for new line */
             board[i][j] = reset_settings(board[i][j]);
             prevFore = board[i][j].foreColour;
             prevBack = board[i][j].backColour;
@@ -69,6 +74,17 @@ void set_board( Cell board[HEIGHT][WIDTH]){
          board[i][j] = set_character(board[i][j]);
       }
    }
+}
+
+Cell set_pixels_zero( Cell c){
+
+   c.pixel.l_top = 0;
+   c.pixel.l_mid = 0;
+   c.pixel.l_bot = 0;
+   c.pixel.r_top = 0;
+   c.pixel.r_mid = 0;
+   c.pixel.r_bot = 0;
+   return c;
 }
 
 Cell reset_settings( Cell c){
@@ -159,7 +175,6 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    SDL_Simplewin sw;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
-
    SDL_Init(SDL_INIT_EVERYTHING);
    Neill_SDL_Init(&sw);
    Neill_SDL_ReadFont(fontdata, FNTFILENAME);
@@ -168,14 +183,15 @@ void print_board(Cell board[HEIGHT][WIDTH]){
       printf("\n");
       for (j=0; j<WIDTH; j++){
          Neill_SDL_DrawCell(&sw, fontdata, board[i][j]  , j*FNTWIDTH, FNTHEIGHT*i);
-         Vlasis_draw_rect(&sw, board[i][j], i*FNTHEIGHT, j*FNTWIDTH);
+         if (board[i][j].Mode == Graphics){
+            Vlasis_draw_rect(&sw, board[i][j], i*FNTHEIGHT, j*FNTWIDTH);
+         }
          SDL_RenderPresent(sw.renderer);
          printf("%c",/*(int) board[i][j]*/board[i][j].character - 128 );
       }
    }
    SDL_UpdateWindowSurface(sw.win);
-   SDL_Delay(100000);
-
+   SDL_Delay(10000);
    SDL_Quit();
 }
 
