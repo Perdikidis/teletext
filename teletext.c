@@ -15,7 +15,6 @@ int main(int argc, char *argv[])
    return 0;
 }
 
-
 void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
 
    int i, j;
@@ -101,10 +100,11 @@ Cell set_foreground(Cell c, int *prevFore){
 
    /* get new colour if the code is right*/
    if (( c.character >= RED) && ( c.character <= WHITE)){
-      c.foreColour = (int) c.character;
+      c.foreColour =  c.character;
    }
-   else if ((c.character >= 0x91) && (c.character <= 0x97)){
-      c.foreColour = (int) c.character - 16;
+   else if ((c.character >= FIRST_COL_GRAPH) && (c.character <= LAST_COL_GRAPH)){
+      /*so i don't #define 7 colours for the graphics as well */
+      c.foreColour =  c.character - DIST_GRAPH_TO_ALPHA;
    }
    else{ /* else retain the previous one */
       c.foreColour = *prevFore;
@@ -195,41 +195,6 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    SDL_Quit();
 }
 
-void Vlasis_draw_rect(SDL_Simplewin *sw, Cell c, int y, int x){
-
-   if( c.pixel.l_top == ACTIVE){
-      light_pixel(sw, y, x, c.foreColour);
-   }
-   if( c.pixel.l_mid == ACTIVE){
-      light_pixel(sw, y + PIXEL_H, x, c.foreColour);
-   }
-   if( c.pixel.l_bot == ACTIVE){
-      light_pixel(sw, y + (2*PIXEL_H), x, c.foreColour);
-   }
-   if( c.pixel.r_top == ACTIVE){
-      light_pixel(sw, y, x + PIXEL_W, c.foreColour);
-   }
-   if( c.pixel.r_mid == ACTIVE){
-      light_pixel(sw, y + PIXEL_H, x + PIXEL_W, c.foreColour);
-   }
-   if( c.pixel.r_bot == ACTIVE){
-      light_pixel(sw, y + (2*PIXEL_H), x + PIXEL_W, c.foreColour);
-   }
-
-}
-
-void light_pixel(SDL_Simplewin *sw, int y, int x, int colour){
-
-   SDL_Rect rect;
-
-   rect.x = x;
-   rect.y = y;
-   rect.w = PIXEL_W;
-   rect.h = PIXEL_H;
-   select_colour(sw, colour);
-   SDL_RenderFillRect( sw->renderer, &rect);
-}
-
 void Neill_SDL_Init(SDL_Simplewin *sw){
 
 
@@ -266,9 +231,20 @@ void Neill_SDL_Init(SDL_Simplewin *sw){
 
 }
 
-void Neill_SDL_SetDrawColour(SDL_Simplewin *sw, Uint8 r, Uint8 g, Uint8 b){
+void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
-   SDL_SetRenderDrawColor(sw->renderer, r, g, b, SDL_ALPHA_OPAQUE);
+    FILE *fp = fopen(fname, "rb");
+    size_t itms;
+    if(!fp){
+       fprintf(stderr, "Can't open Font file %s\n", fname);
+       exit(1);
+   }
+   itms = fread(fontdata, sizeof(fntrow), FNTCHARS*FNTHEIGHT, fp);
+   if(itms != FNTCHARS*FNTHEIGHT){
+       fprintf(stderr, "Can't read all Font file %s (%d) \n", fname, (int)itms);
+       exit(1);
+   }
+   fclose(fp);
 
 }
 
@@ -323,19 +299,43 @@ void select_colour( SDL_Simplewin *sw, int colour ){
 
 }
 
-void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
+void Neill_SDL_SetDrawColour(SDL_Simplewin *sw, Uint8 r, Uint8 g, Uint8 b){
 
-    FILE *fp = fopen(fname, "rb");
-    size_t itms;
-    if(!fp){
-       fprintf(stderr, "Can't open Font file %s\n", fname);
-       exit(1);
-   }
-   itms = fread(fontdata, sizeof(fntrow), FNTCHARS*FNTHEIGHT, fp);
-   if(itms != FNTCHARS*FNTHEIGHT){
-       fprintf(stderr, "Can't read all Font file %s (%d) \n", fname, (int)itms);
-       exit(1);
-   }
-   fclose(fp);
+   SDL_SetRenderDrawColor(sw->renderer, r, g, b, SDL_ALPHA_OPAQUE);
 
+}
+
+void Vlasis_draw_rect(SDL_Simplewin *sw, Cell c, int y, int x){
+
+   if( c.pixel.l_top == ACTIVE){
+      light_pixel(sw, y, x, c.foreColour);
+   }
+   if( c.pixel.l_mid == ACTIVE){
+      light_pixel(sw, y + PIXEL_H, x, c.foreColour);
+   }
+   if( c.pixel.l_bot == ACTIVE){
+      light_pixel(sw, y + (2*PIXEL_H), x, c.foreColour);
+   }
+   if( c.pixel.r_top == ACTIVE){
+      light_pixel(sw, y, x + PIXEL_W, c.foreColour);
+   }
+   if( c.pixel.r_mid == ACTIVE){
+      light_pixel(sw, y + PIXEL_H, x + PIXEL_W, c.foreColour);
+   }
+   if( c.pixel.r_bot == ACTIVE){
+      light_pixel(sw, y + (2*PIXEL_H), x + PIXEL_W, c.foreColour);
+   }
+
+}
+
+void light_pixel(SDL_Simplewin *sw, int y, int x, int colour){
+
+   SDL_Rect rect;
+
+   rect.x = x;
+   rect.y = y;
+   rect.w = PIXEL_W;
+   rect.h = PIXEL_H;
+   select_colour(sw, colour);
+   SDL_RenderFillRect( sw->renderer, &rect);
 }
