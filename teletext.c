@@ -314,13 +314,13 @@ void Neill_SDL_DrawCell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT],
             if (c.Height == Double){
                if ( above_height == Double){
                   if( y >= FNTHEIGHT/2){
-                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2  - 9);
-                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1 - 9);
+                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2  - 7);
+                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1 - 7);
                   }
                }
                else {
-                  SDL_RenderDrawPoint(sw->renderer, ox + x  , oy + y*2  );
-                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1   );
+                  SDL_RenderDrawPoint(sw->renderer, ox + x  , oy + y*2);
+                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1);
                }
             }
             else{
