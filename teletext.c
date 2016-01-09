@@ -227,6 +227,7 @@ void print_board(Cell board[HEIGHT][WIDTH]){
          if (board[i][j].Mode == Graphics){
             Vlasis_draw_rect(&sw, board[i][j], i*FNTHEIGHT, j*FNTWIDTH);
          }
+         /*SDL_Delay(20);*/
          SDL_RenderPresent(sw.renderer);
          printf("%c",/*(int) board[i][j]*/board[i][j].character - 128 );
       }
@@ -297,30 +298,40 @@ void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
 void Neill_SDL_DrawCell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int ox, int oy, int above_height){
 
-   unsigned char chr = c.character -128 ;
-   int x, y;
+   unsigned char chr = c.character - VIS_ASCII;
+   int x, y, count = FNTHEIGHT;
 
 
-   if ( above_height == Double){
-   }
-   for(y = FNTHEIGHT; y >= 0; y--){
-      for(x = FNTWIDTH; x >= 0; x--){
+
+      for(y = FNTHEIGHT-1; y >= 0; y--){
+         for(x = FNTWIDTH-1; x >= 0; x--){
+            select_colour(sw, c.backColour);
+            SDL_RenderDrawPoint(sw->renderer, ox + x, oy + y);
+         }
+      }
+   for(y = FNTHEIGHT-1; y >= 0; y--){
+      if((c.Height == Double) && (above_height == Double)){
+         printf("%c count: %d\n", chr, count );
+      }
+      for(x = FNTWIDTH-1; x >= 0; x--){
+   /*for(y=0; y<FNTHEIGHT; y++){
+      for(x=0; x<FNTWIDTH; x++){*/
          /* background */
-         select_colour(sw, c.backColour);
-         SDL_RenderDrawPoint(sw->renderer, ox + x, oy + y);
+         /*select_colour(sw, c.backColour);
+         SDL_RenderDrawPoint(sw->renderer, ox + x, oy + y);*/
          if(fontdata[chr-FNT1STCHAR][y] >> (FNTWIDTH - 1 - x) & 1){
             /* foreground */
             select_colour(sw, c.foreColour);
             if (c.Height == Double){
                if ( above_height == Double){
                   if( y >= FNTHEIGHT/2){
-                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2  - 7);
-                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1 - 7);
+                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy +  y*2-1-17);
+                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2-17);
                   }
                }
                else {
-                  SDL_RenderDrawPoint(sw->renderer, ox + x  , oy + y*2);
-                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1);
+                     SDL_RenderDrawPoint(sw->renderer, ox + x  , oy + y*2);
+                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1);
                }
             }
             else{
@@ -328,6 +339,7 @@ void Neill_SDL_DrawCell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT],
             }
          }
       }
+      count -= 2;
    }
 }
 
