@@ -14,7 +14,7 @@ clean:
 	rm -f $(TARGET)
 
 run: all
-	./$(TARGET) panda.m7.txt
+	./$(TARGET) test.m7.txt
 
 push:
 	git commit -a -m $$(date +%d-%m-%Y/%H:%M)

@@ -1,3 +1,5 @@
+/* na fugoun ta magic numbers apo to encode_graphics*/
+/*na soulopwsw to set_board kai print_board functions*/
 #include "teletext.h"
 
 int main(int argc, char *argv[])
@@ -39,7 +41,7 @@ void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
          if( board[i][j].character < 128 ){
             board[i][j].character += 128;
          }
-         printf("%d,", board[i][j].character /*, board[i][j]-128)*/);
+         printf("%p,", board[i][j].character /*, board[i][j]-128)*/);
       }
    }
    fclose(fp);
@@ -47,30 +49,59 @@ void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
 
 void set_board( Cell board[HEIGHT][WIDTH]){
 
-   int i, j, prevFore, prevBack, prevMode;
+   unsigned char last_graph;
+   int i, j, prevFore, prevBack, prevMode, prevHeight, prevType, prevHeld;
 
    for (i=0; i<HEIGHT; i++){
       for (j=0; j<WIDTH; j++){
          board[i][j] = set_pixels_zero(board[i][j]);
          if (j == 0){ /* set default settings for new line */
-            board[i][j] = reset_settings(board[i][j]);
+            board[i][j] = default_settings(board[i][j]);
+            /* na ta valw auta se function */
             prevFore = board[i][j].foreColour;
             prevBack = board[i][j].backColour;
             prevMode = board[i][j].Mode;
+            prevHeight = board[i][j].Height;
+            prevHeld = board[i][j].Held_graph;
+            prevType = board[i][j].Type;
+         }
+         /*auta na ta valw se ena switch*/
+         if (board[i][j].character == SINGLE){
+            prevHeight = board[i][j].Height = Single;
+            prevHeld = board[i][j].Held_graph = No;
+         }
+         if (board[i][j].character == DOUBLE){
+            prevHeight = board[i][j].Height = Double;
+            prevHeld = board[i][j].Held_graph = No;
          }
          /* the range of alphanumeric codes */
-         if (( board[i][j].character >= 0x81) && (board[i][j].character <= 0x87)){
-            board[i][j].Mode = Alphanumeric;
-            prevMode = Alphanumeric;
+         if (( board[i][j].character >= RED) && (board[i][j].character <= WHITE)){
+            prevMode = board[i][j].Mode = Alphanumeric;
+            prevHeld = board[i][j].Held_graph = No;
          }/* the range of graphic codes */
-         if (( board[i][j].character >= 0x91) && (board[i][j].character <= 0x97)){
-            board[i][j].Mode =  Graphics;
-            prevMode = Graphics;
+         if (( board[i][j].character >= RED_GRAPH) &&
+             (board[i][j].character <= WHITE_GRAPH)){
+            prevMode = board[i][j].Mode =  Graphics;
+            prevType = board[i][j].Type = Contiguous;
          }
+         if( board[i][j].character == SEPARATED){
+            prevMode = board[i][j].Mode =  Graphics;
+            prevType = board[i][j].Type = Separated;
+         }
+         if( board[i][j].character == HOLD_GRAPHICS){
+            prevHeld = board[i][j].Held_graph = Yes;
+         }
+         if( board[i][j].character == RELEASE_GRAPHICS){
+            prevHeld = board[i][j].Held_graph = No;
+         }
+         /* kai auta na ta valw se mia function */
+         board[i][j].Held_graph = prevHeld;
+         board[i][j].Type = prevType;
+         board[i][j].Height = prevHeight;
          board[i][j].Mode = prevMode;
          board[i][j] = set_foreground(board[i][j], &prevFore);
          board[i][j] = set_background(board[i][j], &prevBack, prevFore);
-         board[i][j] = set_character(board[i][j]);
+         board[i][j] = set_character(board[i][j], &last_graph);
       }
    }
 }
@@ -86,13 +117,14 @@ Cell set_pixels_zero( Cell c){
    return c;
 }
 
-Cell reset_settings( Cell c){
+Cell default_settings( Cell c){
 
    c.foreColour = WHITE;
    c.backColour = BLACK;
    c.Height = Single;
    c.Mode = Alphanumeric;
    c.Type = Contiguous;
+   c.Held_graph = No;
    return c;
 }
 
@@ -102,7 +134,7 @@ Cell set_foreground(Cell c, int *prevFore){
    if (( c.character >= RED) && ( c.character <= WHITE)){
       c.foreColour =  c.character;
    }
-   else if ((c.character >= FIRST_COL_GRAPH) && (c.character <= LAST_COL_GRAPH)){
+   else if ((c.character >= RED_GRAPH) && (c.character <= WHITE_GRAPH)){
       /*so i don't #define 7 colours for the graphics as well */
       c.foreColour =  c.character - DIST_GRAPH_TO_ALPHA;
    }
@@ -130,7 +162,7 @@ Cell set_background(Cell c , int *prevBack, int prevFore){
    return c;
 }
 
-Cell set_character(Cell c){
+Cell set_character(Cell c, unsigned char *last_graph){
 
    /* so we don't print the control codes */
    if ( c.character < SPACE){
@@ -139,16 +171,25 @@ Cell set_character(Cell c){
    if (c.Mode == Graphics){
       /* Everything, but the blast through text*/
       if ((c.character < 0xc0) || (c.character >=0xe0) ){
-         c = encode_graphics(c);
+         if( c.Held_graph == Yes ){
+            c = encode_graphics(c, *last_graph);
+            c.character = *last_graph;
+         }
+         else{
+            c = encode_graphics(c, c.character);
+         }
+         /* I will use this for the hold graphics mode*/
+         *last_graph = c.character;
          c.character = SPACE;
       }
    }
    return c;
 }
 
-Cell encode_graphics(Cell c){
+Cell encode_graphics(Cell old, unsigned char chr){
 
-   int code = c.character - BASECODE;
+   Cell c = old;
+   int code = chr - BASECODE;
 
 
    c.pixel.r_bot = code / 64;/* check if the bottom right sixel is active */
@@ -171,7 +212,7 @@ Cell encode_graphics(Cell c){
 
 void print_board(Cell board[HEIGHT][WIDTH]){
 
-   int i, j;
+   int i, j, above_height;
    SDL_Simplewin sw;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
@@ -182,12 +223,18 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    for (i=0; i<HEIGHT; i++){
       printf("\n");
       for (j=0; j<WIDTH; j++){
-         Neill_SDL_DrawCell(&sw, fontdata, board[i][j]  , j*FNTWIDTH, FNTHEIGHT*i);
+         Neill_SDL_DrawCell(&sw, fontdata, board[i][j], j*FNTWIDTH, FNTHEIGHT*i, board[i-1][j].Height);
          if (board[i][j].Mode == Graphics){
             Vlasis_draw_rect(&sw, board[i][j], i*FNTHEIGHT, j*FNTWIDTH);
          }
          SDL_RenderPresent(sw.renderer);
          printf("%c",/*(int) board[i][j]*/board[i][j].character - 128 );
+      }
+   }
+   for (i=0; i<HEIGHT; i++){
+      /*printf("\n");*/
+      for (j=0; j<WIDTH; j++){
+         /*printf("%d", board[i][j].Height);*/
       }
    }
    SDL_UpdateWindowSurface(sw.win);
@@ -206,7 +253,7 @@ void Neill_SDL_Init(SDL_Simplewin *sw){
 
    sw->finished = 0;
 
-   sw->win= SDL_CreateWindow("Vlasis Teletext",
+   sw->win= SDL_CreateWindow("Vlasis' Teletext",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
                           WWIDTH, WHEIGHT,
@@ -225,7 +272,7 @@ void Neill_SDL_Init(SDL_Simplewin *sw){
    }
 
    /* Set screen to black */
-   Neill_SDL_SetDrawColour(sw, 0, 100, 0);
+   Neill_SDL_SetDrawColour(sw, 0, 0, 0);
    SDL_RenderClear(sw->renderer);
    SDL_RenderPresent(sw->renderer);
 
@@ -248,21 +295,37 @@ void Neill_SDL_ReadFont(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
 }
 
-void Neill_SDL_DrawCell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int ox, int oy){
+void Neill_SDL_DrawCell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int ox, int oy, int above_height){
 
-   unsigned x, y;
    unsigned char chr = c.character -128 ;
+   int x, y;
 
-   for(y = 0; y < FNTHEIGHT; y++){
-      for(x = 0; x < FNTWIDTH; x++){
+
+   if ( above_height == Double){
+   }
+   for(y = FNTHEIGHT; y >= 0; y--){
+      for(x = FNTWIDTH; x >= 0; x--){
+         /* background */
+         select_colour(sw, c.backColour);
+         SDL_RenderDrawPoint(sw->renderer, ox + x, oy + y);
          if(fontdata[chr-FNT1STCHAR][y] >> (FNTWIDTH - 1 - x) & 1){
             /* foreground */
             select_colour(sw, c.foreColour);
-            SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
-         }
-         else{/*background*/
-            select_colour(sw, c.backColour);
-            SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
+            if (c.Height == Double){
+               if ( above_height == Double){
+                  if( y >= FNTHEIGHT/2){
+                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2  - 9);
+                     SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1 - 9);
+                  }
+               }
+               else {
+                  SDL_RenderDrawPoint(sw->renderer, ox + x  , oy + y*2  );
+                  SDL_RenderDrawPoint(sw->renderer, ox + x , oy + y*2+1   );
+               }
+            }
+            else{
+               SDL_RenderDrawPoint(sw->renderer, ox + x, oy + y );
+            }
          }
       }
    }
@@ -308,34 +371,39 @@ void Neill_SDL_SetDrawColour(SDL_Simplewin *sw, Uint8 r, Uint8 g, Uint8 b){
 void Vlasis_draw_rect(SDL_Simplewin *sw, Cell c, int y, int x){
 
    if( c.pixel.l_top == ACTIVE){
-      light_pixel(sw, y, x, c.foreColour);
+      light_pixel(sw, y, x, c.foreColour, c.Type);
    }
    if( c.pixel.l_mid == ACTIVE){
-      light_pixel(sw, y + PIXEL_H, x, c.foreColour);
+      light_pixel(sw, y + PIXEL_H, x, c.foreColour, c.Type);
    }
    if( c.pixel.l_bot == ACTIVE){
-      light_pixel(sw, y + (2*PIXEL_H), x, c.foreColour);
+      light_pixel(sw, y + (2*PIXEL_H), x, c.foreColour, c.Type);
    }
    if( c.pixel.r_top == ACTIVE){
-      light_pixel(sw, y, x + PIXEL_W, c.foreColour);
+      light_pixel(sw, y, x + PIXEL_W, c.foreColour, c.Type);
    }
    if( c.pixel.r_mid == ACTIVE){
-      light_pixel(sw, y + PIXEL_H, x + PIXEL_W, c.foreColour);
+      light_pixel(sw, y + PIXEL_H, x + PIXEL_W, c.foreColour, c.Type);
    }
    if( c.pixel.r_bot == ACTIVE){
-      light_pixel(sw, y + (2*PIXEL_H), x + PIXEL_W, c.foreColour);
+      light_pixel(sw, y + (2*PIXEL_H), x + PIXEL_W, c.foreColour, c.Type);
    }
 
 }
 
-void light_pixel(SDL_Simplewin *sw, int y, int x, int colour){
+void light_pixel(SDL_Simplewin *sw, int y, int x, int colour, int type){
 
    SDL_Rect rect;
+   int pixel_w = PIXEL_W , pixel_h = PIXEL_H;
 
+   if (type == Separated){
+      pixel_h -=  PIXEL_DISTANCE;
+      pixel_w -=  PIXEL_DISTANCE;
+   }
    rect.x = x;
    rect.y = y;
-   rect.w = PIXEL_W;
-   rect.h = PIXEL_H;
+   rect.w = pixel_w;
+   rect.h = pixel_h;
    select_colour(sw, colour);
    SDL_RenderFillRect( sw->renderer, &rect);
 }
