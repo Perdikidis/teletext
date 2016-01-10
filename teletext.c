@@ -1,6 +1,6 @@
-/* na sw ti epistrefei ka8e function kai ka8e entolh tou SDL.. px. draw_rect*/
+/* na dw ti epistrefei ka8e function kai ka8e entolh tou SDL.. px. draw_rect*/
 /* MAGIC NUMBERS STO encode_graphics*/
-/*na soulopwsw to set_board kai print_board functions*/
+/* na kanw vlagrid*/
 #include "teletext.h"
 
 int main(int argc, char *argv[])
