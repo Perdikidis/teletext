@@ -251,7 +251,7 @@ void init(SDL_Simplewin *sw){
    sw->win= SDL_CreateWindow("Vlasis' Teletext",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          WWIDTH, WHEIGHT,
+                          WINDOW_WIDTH, WINDOW_HEIGHT,
                           SDL_WINDOW_SHOWN);
    if(sw->win == NULL){
       fprintf(stderr, "\nUnable to initialize SDL Window:  %s\n", SDL_GetError());
@@ -265,8 +265,8 @@ void init(SDL_Simplewin *sw){
       SDL_Quit();
       exit(1);
    }
-   /* Set screen to white */
-   set_colour(sw, 255, 255, 255);
+   /*set screen black*/
+   set_colour(sw, 0, 0, 0);
    SDL_RenderClear(sw->renderer);
    SDL_RenderPresent(sw->renderer);
 }
