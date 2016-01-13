@@ -11,6 +11,10 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
+   if (test() != 0 ){
+      printf("Testing failed\n\n\n");
+      exit (1);
+   }
    read_file(argv[1], board);
    set_board(board);
    print_board(board);
@@ -65,6 +69,7 @@ void set_board( Cell board[HEIGHT][WIDTH]){
    }
 }
 
+/* done */
 Cell set_pixels_zero( Cell c){
 
    c.pixel.l_top = 0;
@@ -97,11 +102,11 @@ Cell exam_cases(Cell c, Cell *prev){
       prev->Height = c.Height = Double;
       prev->Held_graph = c.Held_graph = No;
    }
-   /* the range of alphanumeric codes */
+   /* the range of alphanumeric colour code */
    if (( c.character >= RED) && (c.character <= WHITE)){
       prev->Mode = c.Mode = Alphanumeric;
       prev->Held_graph = c.Held_graph = No;
-   }/* the range of graphic codes */
+   }/* the range of graphic colour codes */
    if (( c.character >= RED_GRAPH) && (c.character <= WHITE_GRAPH)){
       prev->Mode = c.Mode =  Graphics;
       prev->Type = c.Type = Contiguous;
@@ -215,11 +220,11 @@ Cell encode_graphics(Cell old, unsigned char chr){
 void print_board(Cell board[HEIGHT][WIDTH]){
 
    int i, y, j, x, height_of_above;
-   SDL_Simplewin sw;
+   Window sw;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
    SDL_Init(SDL_INIT_EVERYTHING);
-   init(&sw);
+   init_window(&sw);
    read_font(fontdata, FNTFILENAME);
 
    for (i=0; i<HEIGHT; i++){
@@ -227,26 +232,20 @@ void print_board(Cell board[HEIGHT][WIDTH]){
          height_of_above = board[i-1][j].Height;
          y = FNTHEIGHT*i; x = j*FNTWIDTH;
          draw_cell(&sw, fontdata, board[i][j], x, y, height_of_above);
-         SDL_RenderPresent(sw.renderer);
-         SDL_Delay(5);
          if (board[i][j].Mode == Graphics){
             Vlasis_draw_rect(&sw, board[i][j], y, x);
          }
+         SDL_RenderPresent(sw.renderer);
+         SDL_Delay(5);
       }
    }
 
    SDL_UpdateWindowSurface(sw.win);
-   SDL_Delay(10000);
+   SDL_Delay(100);
    SDL_Quit();
 }
 
-void init(SDL_Simplewin *sw){
-
-   if (SDL_Init(SDL_INIT_VIDEO) != 0) {
-      fprintf(stderr, "\nUnable to initialize SDL:  %s\n", SDL_GetError());
-      SDL_Quit();
-      exit(1);
-   }
+void init_window(Window *sw){
 
    sw->win= SDL_CreateWindow("Vlasis' Teletext",
                           SDL_WINDOWPOS_UNDEFINED,
@@ -266,7 +265,7 @@ void init(SDL_Simplewin *sw){
       exit(1);
    }
    /*set screen black*/
-   set_colour(sw, 0, 0, 0);
+   SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
    SDL_RenderClear(sw->renderer);
    SDL_RenderPresent(sw->renderer);
 }
@@ -288,7 +287,7 @@ void read_font(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
 }
 
-void draw_cell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, int y, int height_of_above){
+void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, int y, int height_of_above){
 
    unsigned char chr = c.character - VISABLE_ASCII;
    int i=0, j=0, cell_height = FNTHEIGHT, cell_width = FNTWIDTH;
@@ -314,7 +313,7 @@ void draw_cell(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, 
    }
 }
 
-void draw_background(SDL_Simplewin *sw, int colour, int x, int y){
+void draw_background(Window *sw, int colour, int x, int y){
 
    int i, j;
    for(i = 0; i < FNTHEIGHT; i++){
@@ -325,7 +324,7 @@ void draw_background(SDL_Simplewin *sw, int colour, int x, int y){
    }
 }
 
-void draw_foreground(SDL_Simplewin *sw, Cell c, int x, int y, int i){
+void draw_foreground(Window *sw, Cell c, int x, int y, int i){
 
    select_colour(sw, c.foreColour);
    if (c.Height == Single){
@@ -337,44 +336,40 @@ void draw_foreground(SDL_Simplewin *sw, Cell c, int x, int y, int i){
    }
 }
 
-void select_colour( SDL_Simplewin *sw, int colour ){
+/* done */
+void select_colour( Window *sw, int colour ){
 
    switch (colour) {
-      case RED:/*                    R,   G, B */
-         set_colour(sw, 255, 0, 0);
+      case RED:                             /* R   G  B */
+         SDL_SetRenderDrawColor(sw->renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
          break;
       case GREEN:
-         set_colour(sw, 0, 255, 0);
+         SDL_SetRenderDrawColor(sw->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
          break;
       case YELLOW:
-         set_colour(sw, 255, 255, 0);
+         SDL_SetRenderDrawColor(sw->renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
          break;
       case BLUE:
-         set_colour(sw, 0, 0, 255);
+         SDL_SetRenderDrawColor(sw->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
          break;
       case MAGENTA:
-         set_colour(sw, 255, 0, 127);
+         SDL_SetRenderDrawColor(sw->renderer, 255, 0, 127, SDL_ALPHA_OPAQUE);
          break;
       case CYAN:
-         set_colour(sw, 0, 255, 255);
+         SDL_SetRenderDrawColor(sw->renderer, 0, 255, 255, SDL_ALPHA_OPAQUE);
          break;
       case WHITE:
-         set_colour(sw, 255, 255, 255);
+         SDL_SetRenderDrawColor(sw->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
          break;
       case BLACK:
-         set_colour(sw, 0, 0, 0);
+         SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
          break;
    }
 
 }
 
-void set_colour(SDL_Simplewin *sw, Uint8 r, Uint8 g, Uint8 b){
-
-   SDL_SetRenderDrawColor(sw->renderer, r, g, b, SDL_ALPHA_OPAQUE);
-
-}
-
-void Vlasis_draw_rect(SDL_Simplewin *sw, Cell c, int y, int x){
+/* done */
+void Vlasis_draw_rect(Window *sw, Cell c, int y, int x){
 
    if( c.pixel.l_top == ACTIVE){
       light_pixel(sw, y, x, c.foreColour, c.Type);
@@ -397,10 +392,11 @@ void Vlasis_draw_rect(SDL_Simplewin *sw, Cell c, int y, int x){
 
 }
 
-void light_pixel(SDL_Simplewin *sw, int y, int x, int colour, int type){
+/* done */
+void light_pixel(Window *sw, int y, int x, int colour, int type){
 
    SDL_Rect rect;
-   int pixel_w = PIXEL_W , pixel_h = PIXEL_H;
+   int pixel_w = PIXEL_W , pixel_h = PIXEL_H, return_value;
 
    if (type == Separated){
       pixel_h -=  PIXEL_DISTANCE;
@@ -411,5 +407,10 @@ void light_pixel(SDL_Simplewin *sw, int y, int x, int colour, int type){
    rect.w = pixel_w;
    rect.h = pixel_h;
    select_colour(sw, colour);
-   SDL_RenderFillRect( sw->renderer, &rect);
+   return_value = SDL_RenderFillRect( sw->renderer, &rect);
+   if(return_value != 0){
+      fprintf(stderr, "\nUnable to fill rect: %s\n", SDL_GetError());
+      SDL_Quit();
+      exit(1);
+   }
 }
