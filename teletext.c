@@ -11,10 +11,10 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
-   if (test() != 0 ){
+   /*if (test() != 0 ){
       printf("Testing failed\n\n\n");
       exit (1);
-   }
+   }*/
    read_file(argv[1], board);
    set_board(board);
    print_board(board);
@@ -223,7 +223,12 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    Window sw;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
-   SDL_Init(SDL_INIT_EVERYTHING);
+   /*na dw an einai na ksefortw8w to sdl_init*/
+   if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
+     fprintf(stderr, "\nUnable to initialize SDL:  %s\n", SDL_GetError());
+     SDL_Quit();
+     exit(1);
+   }
    init_window(&sw);
    read_font(fontdata, FNTFILENAME);
 
@@ -241,10 +246,11 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    }
 
    SDL_UpdateWindowSurface(sw.win);
-   SDL_Delay(100);
+   SDL_Delay(10000);
    SDL_Quit();
 }
 
+/*DONE*/
 void init_window(Window *sw){
 
    sw->win= SDL_CreateWindow("Vlasis' Teletext",
@@ -270,21 +276,21 @@ void init_window(Window *sw){
    SDL_RenderPresent(sw->renderer);
 }
 
+ /*den 8a to testarw kai na to grapsw sto .txt file*/
 void read_font(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
-    FILE *fp = fopen(fname, "rb");
-    size_t itms;
-    if(!fp){
-       fprintf(stderr, "Can't open Font file %s\n", fname);
-       exit(1);
+   FILE *fp = fopen(fname, "rb");
+   size_t itms;
+   if(!fp){
+      fprintf(stderr, "Can't open Font file %s\n", fname);
+      exit(1);
    }
    itms = fread(fontdata, sizeof(fntrow), FNTCHARS*FNTHEIGHT, fp);
    if(itms != FNTCHARS*FNTHEIGHT){
-       fprintf(stderr, "Can't read all Font file %s (%d) \n", fname, (int)itms);
-       exit(1);
+      fprintf(stderr, "Can't read all Font file %s (%d) \n", fname, (int)itms);
+      exit(1);
    }
    fclose(fp);
-
 }
 
 void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, int y, int height_of_above){
