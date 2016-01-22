@@ -1,0 +1,14 @@
+#include "neillsdl2.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+
+#define HEIGHT 25
+#define WIDTH 40
+#define FNTFILENAME "m7fixed.fnt"
+
+
+
+void read_file (char *filename, unsigned char board[HEIGHT][WIDTH]);
+void print_board(unsigned char board[HEIGHT][WIDTH]);
