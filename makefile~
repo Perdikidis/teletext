@@ -8,14 +8,22 @@ CC = gcc
 
 all: $(TARGET)
 
+<<<<<<< HEAD
 $(TARGET):  $(SOURCES) $(INCS)
 	$(CC)  $(SOURCES) -o $(TARGET) $(CFLAGS) $(LIBS)
+=======
+$(TARGET): $(SOURCES) $(INCS)
+	$(CC) $(SOURCES) -o $(TARGET) $(CFLAGS) $(LIBS)
+>>>>>>> a7b18421d4c492ae67b25a21c8a8d7b622da6e6b
 
 
 run: all
 	./$(TARGET) test.m7.txt
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> a7b18421d4c492ae67b25a21c8a8d7b622da6e6b
 
 push:
 	git commit -a -m $$(date +%d-%m-%Y/%H:%M)
