@@ -1,4 +1,5 @@
-/*testarw to push kai add*/
+/*testarw to push kai add
+kai ksana dokimazw*/
 
 #include <math.h>
 #include <stdio.h>
