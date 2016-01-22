@@ -1,5 +1,6 @@
 /*testarw to push kai add
-kai ksana dokimazw*/
+kai ksana dokimazw
+kai trith fora*/
 
 #include <math.h>
 #include <stdio.h>
