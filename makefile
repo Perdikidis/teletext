@@ -19,7 +19,7 @@ run: all
 
 push:
 	git commit -a -m $$(date +%d-%m-%Y/%H:%M)
-	git push
+	git push https://github.com/Perdikidis/teletext
 pull:
 	git pull https://github.com/Perdikidis/teletext
 
