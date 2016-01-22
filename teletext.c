@@ -1,6 +1,7 @@
 /* na dw ti epistrefei ka8e function kai ka8e entolh tou SDL.. px. draw_rect*/
 /* MAGIC NUMBERS STO encode_graphics*/
 /* na kanw vlagrid*/
+/*add key input instead of sdl delay*/
 #include "teletext.h"
 
 int main(int argc, char *argv[])

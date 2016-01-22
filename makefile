@@ -1,8 +1,8 @@
-CFLAGS = `sdl2-config --cflags` -O4 -Wall -Wextra -Wfloat-equal -pedantic -std=c89 -lm -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+CFLAGS = `pkg-config sdl2 --cflags` -O4 -Wall -Wextra -Wfloat-equal -pedantic -std=c89 -lm
 INCS = teletext.h test.h
 TARGET = teletext
 SOURCES = $(TARGET).c
-LIBS =  `sdl2-config --libs`
+LIBS =  `pkg-config sdl2 --libs`
 CC = gcc
 
 
