@@ -1,15 +1,10 @@
-/*testarw to push kai add
-kai ksana dokimazw
-kai trith fora
-kai tetarth fora*/
-
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <SDL2/SDL.h>
-
+#include <SDL2/SDL_image.h>
 
 #define DIST_GRAPH_TO_ALPHA 16
 #define HEIGHT 25
@@ -27,6 +22,7 @@ kai tetarth fora*/
 #define BASECODE 160
 #define ACTIVE 1
 #define VISABLE_ASCII 128
+#define ESCAPE 2
 
 /* Font stuff */
 typedef unsigned short fntrow;
@@ -91,3 +87,4 @@ void select_colour( Window *sw, int colour );/* DONE */
 void set_colour(Window *sw, Uint8 r, Uint8 g, Uint8 b);
 void Vlasis_draw_rect(Window *sw, Cell c, int y, int x);/*DONE*/
 void light_pixel(Window *sw, int y, int x, int colour, int type);/*DONE*/
+int event_handling(int *button);

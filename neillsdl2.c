@@ -117,34 +117,10 @@ void Neill_SDL_DrawChar(SDL_Simplewin *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT],
          if(fontdata[chr-FNT1STCHAR][y] >> (FNTWIDTH - 1 - x) & 1){
             /*printf("*");*/
             /* White Ink */
-            switch (fColor) {
-               case REDALPHA:/*               R,   G, B */
-                  Neill_SDL_SetDrawColour(sw, 255, 0, 0);
-                  break;
-               case GREENALPHA:
-                  Neill_SDL_SetDrawColour(sw, 0, 255, 0);
-                  break;
-               case YELLOWALPHA:
-                  Neill_SDL_SetDrawColour(sw, 255, 255, 0);
-                  break;
-               case BLUEALPHA:
-                  Neill_SDL_SetDrawColour(sw, 0, 255, 0);
-                  break;
-               case MAGENTAALPHA:
-                  Neill_SDL_SetDrawColour(sw, 255, 0, 127);
-                  break;
-               case CYANALPHA:
-                  Neill_SDL_SetDrawColour(sw, 0, 255, 255);
-                  break;
-               case WHITEALPHA:
-                  Neill_SDL_SetDrawColour(sw, 255, 255, 255);
-                  break;
-               default: /* white as default */
-                  Neill_SDL_SetDrawColour(sw, 255, 255, 255);
-            }
+            Neill_SDL_SetDrawColour(sw, 255, 255, 255);
             /*Neill_SDL_SetDrawColour(sw, 255, 255, 255);/*γράμματα*/
             SDL_RenderDrawPoint(sw->renderer, x + ox, y+oy);
-         }
+            }
          else{
             /*printf(".");*/
             /* Black Ink */

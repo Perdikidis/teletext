@@ -5,34 +5,164 @@
 int test(void)
 {
 
-   int tot_errors=0, tot_tests=0, a = 100;
+   int tot_errors=0, tot_tests=0;
+   Window testWin;
+   fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
+   read_font(fontdata, FNTFILENAME);
    printf("\n\nTESTING!!!!\n\n\n");
-   tot_errors += test_init_window( &tot_tests);
+   /*
+   tot_errors += test_event_handling( &tot_tests, testWin);
+   tot_errors += test_init_window( &tot_tests, fontdata);
    tot_errors += test_select_colour( &tot_tests);
    tot_errors += test_light_pixel(&tot_tests);
-   tot_errors += test_Vlasis_draw_rect(&tot_tests);
+   tot_errors += test_Vlasis_draw_rect(&tot_tests);*/
+   tot_errors += test_draw_background( &tot_tests, fontdata);
+
    printf("\n\n%d of %d tests passed\n\n", tot_tests - tot_errors, tot_tests);
 
    return tot_errors;
 }
 
-int test_init_window( int *tot_tests){
+int test_event_handling(int *tot_tests, Window testWin){
+   int result=0;
+   /*Window testWin;*/
+   fntrow fontdata[FNTCHARS][FNTHEIGHT];
+   int line=0, button=0;
+
+   read_font(fontdata, FNTFILENAME);
+   testWin.win= SDL_CreateWindow("testing event handling",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          600, 400,
+                          SDL_WINDOW_SHOWN);
+
+   testWin.renderer = SDL_CreateRenderer(testWin.win, -1, 0);
+   SDL_SetRenderDrawColor(testWin.renderer, 10, 10, 10, SDL_ALPHA_OPAQUE);
+   SDL_RenderClear(testWin.renderer);
+   SDL_RenderPresent(testWin.renderer);
+
+   DrawString(&testWin, fontdata,"press 'y'", 0, FNTHEIGHT * ++line);
+   SDL_RenderPresent(testWin.renderer);
+   do{
+      event_handling(&button);
+   }while(button != 'y');
+   DrawString(&testWin, fontdata,"passed", 300, FNTHEIGHT * line);
+
+   DrawString(&testWin, fontdata,"press 'n' ", 0, FNTHEIGHT * ++line);
+   SDL_RenderPresent(testWin.renderer);
+   do{
+      event_handling(&button);
+   }while(button != 'n');
+   DrawString(&testWin, fontdata,"passed", 300, FNTHEIGHT * line);
+
+   DrawString(&testWin, fontdata,"press space bar", 0, FNTHEIGHT * ++line);
+   SDL_RenderPresent(testWin.renderer);
+   do{
+      event_handling(&button);
+   }while(button != SPACE);
+   DrawString(&testWin, fontdata,"passed", 300, FNTHEIGHT * line);
+
+   DrawString(&testWin, fontdata,"press escape", 0, FNTHEIGHT * ++line);
+   SDL_RenderPresent(testWin.renderer);
+   do{
+      event_handling(&button);
+   }while(button != ESCAPE);
+   DrawString(&testWin, fontdata,"passed", 300, FNTHEIGHT * line);
+   SDL_RenderPresent(testWin.renderer);
+
+   SDL_Delay(500);
+   SDL_DestroyWindow(testWin.win);
+   SDL_Quit();
+   printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "handle_event", GRNSTR, WHITESTR );
+   return PASS;
+}
+
+void popup(){
+
+   Window popUp;
+   fntrow fontdata[FNTCHARS][FNTHEIGHT];
+   int line=0, button=0;
+
+   read_font(fontdata, FNTFILENAME);
+   popUp.win= SDL_CreateWindow("popup message",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          600, 400,
+                          SDL_WINDOW_SHOWN);
+
+   popUp.renderer = SDL_CreateRenderer(popUp.win, -1, 0);
+   SDL_SetRenderDrawColor(popUp.renderer, 0, 100, 0, SDL_ALPHA_OPAQUE);
+   SDL_RenderClear(popUp.renderer);
+   SDL_RenderPresent(popUp.renderer);
+
+   DrawString(&popUp, fontdata,"Expected result from next test:", 0, FNTHEIGHT * ++line);
+   DrawString(&popUp, fontdata,"to draw a black window named ", 0, FNTHEIGHT * ++line);
+   DrawString(&popUp, fontdata,"Vlasis' Teletext with size: 640x450", 0, FNTHEIGHT * ++line);
+   DrawString(&popUp, fontdata,"     if ready press space", 0, 350);
+   SDL_RenderPresent(popUp.renderer);
+   SDL_UpdateWindowSurface(popUp.win);
+   do{
+      event_handling(&button);
+   }while(button != SPACE);
+   SDL_DestroyWindow(popUp.win);
+   SDL_Quit();
+}
+
+int did_test_passed(){
+
+   Window pass_popUp;
+   fntrow fontdata[FNTCHARS][FNTHEIGHT];
+   int line=0, button=0;
+
+   read_font(fontdata, FNTFILENAME);
+   pass_popUp.win= SDL_CreateWindow("did it pass?",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          600, 200,
+                          SDL_WINDOW_SHOWN);
+
+   pass_popUp.renderer = SDL_CreateRenderer(pass_popUp.win, -1, 0);
+   SDL_SetRenderDrawColor(pass_popUp.renderer, 200, 0, 0, SDL_ALPHA_OPAQUE);
+   SDL_RenderClear(pass_popUp.renderer);
+   SDL_RenderPresent(pass_popUp.renderer);
+
+   DrawString(&pass_popUp, fontdata, "Was the test successful?", 0, FNTHEIGHT * ++line);
+   DrawString(&pass_popUp, fontdata, "if yes press 'y', else 'n'", 0, FNTHEIGHT * ++line);
+   SDL_RenderPresent(pass_popUp.renderer);
+   SDL_UpdateWindowSurface(pass_popUp.win);
+   do{
+      event_handling(&button);
+   }while(button != ESCAPE);
+   SDL_DestroyWindow(pass_popUp.win);
+   SDL_Quit();
+   return button;
+}
+
+int test_init_window( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
 
    Window testWin;
+   int button=0, result=0;
 
    testWin.win = NULL;
-   /*Expect to draw a black window named "Vlasis' Teletext"
-     with size: WINDOW_WIDTH * WINDOW_HEIGHT (AKA 640x450)*/
+   popup();
    init_window(&testWin);
-   if (testWin.win == NULL){
+   SDL_Delay(1000);
+   /*
+   do{
+   event_handling(&button);
+   }while(button != SPACE);
+   */
+   /*result = did_test_passed();*/
+   if (result == 'n'){
       printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "init_window", REDSTR, WHITESTR );
       return FAIL;
    }
-   else{
+   else if(result == 'y'){
       printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "init_window", GRNSTR, WHITESTR );
       return PASS;
    }
+   SDL_DestroyWindow(testWin.win);
    SDL_Quit();
 }
 
@@ -207,4 +337,48 @@ int test_Vlasis_draw_rect(int *tot_tests){
    /* edw prepei na valw if statments */
    printf("%d. %23s %sPASS%s\n", ++*tot_tests, "Vlasis_draw_rect", GRNSTR, WHITESTR );
    return PASS;
+}
+
+int test_draw_background(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
+
+   int x=0, y=0, button=0;
+   Window testWin;
+
+   testWin.win= SDL_CreateWindow("draw_background",
+                          SDL_WINDOWPOS_UNDEFINED,
+                          SDL_WINDOWPOS_UNDEFINED,
+                          800, 300,
+                          SDL_WINDOW_SHOWN);
+   testWin.renderer = SDL_CreateRenderer(testWin.win, -1, 0);
+   /*set a grey window of size 300x300 */
+   SDL_SetRenderDrawColor(testWin.renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+   SDL_RenderClear(testWin.renderer);
+   SDL_RenderPresent(testWin.renderer);
+
+   DrawString(&testWin, fontdata, "expect to see a small green rect ", 0, FNTHEIGHT * ++y);
+   SDL_RenderPresent(testWin.renderer);
+   SDL_Delay(2000);
+
+   draw_background(&testWin, GREEN, 400,  FNTHEIGHT * ++y);
+   SDL_RenderPresent(testWin.renderer);
+   SDL_Delay(2000);
+
+
+   DrawString(&testWin, fontdata, "Was the test successful?", 0, FNTHEIGHT * ++y);
+   DrawString(&testWin, fontdata, "if yes press 'y', else 'n'", 0, FNTHEIGHT * ++y);
+   SDL_RenderPresent(testWin.renderer);
+
+   do{
+      event_handling(&button);
+   }while((button != 'y') && (button != 'n'));
+   SDL_DestroyWindow(testWin.win);
+   SDL_Quit();
+   if (button == 'n'){
+      printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "draw_background", REDSTR, WHITESTR );
+      return FAIL;
+   }
+   else if(button == 'y'){
+      printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "draw_background", GRNSTR, WHITESTR );
+      return PASS;
+   }
 }

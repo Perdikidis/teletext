@@ -12,13 +12,13 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
-   /*if (test() != 0 ){
+   if (test() != 0 ){
       printf("Testing failed\n\n\n");
       exit (1);
-   }*/
-   read_file(argv[1], board);
+   }
+   /*read_file(argv[1], board);
    set_board(board);
-   print_board(board);
+   print_board(board);*/
    return 0;
 }
 
@@ -53,7 +53,7 @@ void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
 
 void set_board( Cell board[HEIGHT][WIDTH]){
 
-   unsigned char last_graph =SPACE;
+   unsigned char last_graph = SPACE;
    int i, j;
    Cell prev;
 
@@ -189,6 +189,7 @@ Cell set_character(Cell c, unsigned char *last_graph){
          }
          /*I will use last_graph for the hold graphics mode*/
          *last_graph = c.character;
+         /*don't want to print anything else apart from the graphics*/
          c.character = SPACE;
       }
    }
@@ -220,11 +221,10 @@ Cell encode_graphics(Cell old, unsigned char chr){
 
 void print_board(Cell board[HEIGHT][WIDTH]){
 
-   int i, y, j, x, height_of_above;
+   int i, y, j, x, height_of_above, button;
    Window sw;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
 
-   /*na dw an einai na ksefortw8w to sdl_init*/
    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
      fprintf(stderr, "\nUnable to initialize SDL:  %s\n", SDL_GetError());
      SDL_Quit();
@@ -247,7 +247,10 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    }
 
    SDL_UpdateWindowSurface(sw.win);
-   SDL_Delay(10000);
+   while (button != ESCAPE){
+      event_handling(&button);
+   }
+   SDL_DestroyWindow(sw.win);
    SDL_Quit();
 }
 
@@ -319,7 +322,7 @@ void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, 
       }
    }
 }
-
+ /* done */
 void draw_background(Window *sw, int colour, int x, int y){
 
    int i, j;
@@ -420,4 +423,32 @@ void light_pixel(Window *sw, int y, int x, int colour, int type){
       SDL_Quit();
       exit(1);
    }
+}
+/* done*/
+int event_handling(int *button){
+
+   SDL_Event event;
+   while(SDL_PollEvent(&event))
+   {
+      switch (event.type){
+        case SDL_KEYDOWN:
+          switch( event.key.keysym.sym ){
+            case SDLK_y:
+              *button='y';
+              break;
+            case SDLK_n:
+              *button='n';
+              break;
+            case SDLK_ESCAPE:
+               *button = ESCAPE;
+               break;
+            case SDLK_SPACE:
+               *button = SPACE;
+               break;
+          }
+        break;
+      }
+      return(0);
+   }
+   return(0);
 }

@@ -8,8 +8,8 @@ CC = gcc
 
 all: $(TARGET)
 
-$(TARGET): $(SOURCES) $(INCS)
-	$(CC) $(SOURCES) -o $(TARGET) $(CFLAGS) $(LIBS)
+$(TARGET): test.c $(SOURCES) $(INCS)
+	$(CC) test.c $(SOURCES) -o $(TARGET) $(CFLAGS) $(LIBS)
 
 clean:
 	rm -f $(TARGET)
@@ -23,4 +23,3 @@ push:
 	git push
 pull:
 	git pull
-
