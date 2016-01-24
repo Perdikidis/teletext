@@ -11,27 +11,119 @@ int test(void)
 
    read_font(fontdata, FNTFILENAME);
    printf("\n\nTESTING!!!!\n\n\n");
-   tot_errors += test_new_line_settings(&tot_tests);
 
-   /*
-   tot_errors += test_exam_cases(&tot_tests);
-   tot_errors += test_set_current_cell(&tot_tests);
-   tot_errors += test_set_foreground(&tot_tests);
-   tot_errors += test_set_background(&tot_tests);
-   tot_errors += test_set_character(&tot_tests);
-   tot_errors += test_encode_graphics(&tot_tests);
-   tot_errors += test_set_pixels_zero(&tot_tests);
+   tot_errors += test_read_file(&tot_tests);
    tot_errors += test_event_handling( &tot_tests, testWin);
    tot_errors += test_init_window( &tot_tests, fontdata);
    tot_errors += test_select_colour( &tot_tests, fontdata);
    tot_errors += test_light_pixel(&tot_tests, fontdata);
    tot_errors += test_Vlasis_draw_rect(&tot_tests, fontdata);
-   tot_errors += test_draw_cell( &tot_tests, fontdata);
-   */
+   tot_errors += test_draw_cell( &tot_tests, &tot_errors, fontdata);
+   tot_errors += test_set_pixels_zero(&tot_tests);
+   tot_errors += test_new_line_settings(&tot_tests);
+   tot_errors += test_exam_cases(&tot_tests);
+   tot_errors += test_set_foreground(&tot_tests);
+   tot_errors += test_set_background(&tot_tests);
+   tot_errors += test_encode_graphics(&tot_tests);
+   tot_errors += test_set_character(&tot_tests);
+   tot_errors += test_set_current_cell(&tot_tests);
+   tot_errors += test_set_board(&tot_tests);
+   tot_errors += test_print_board(&tot_tests);
 
    printf("\n\n%d of %d tests passed\n\n", tot_tests - tot_errors, tot_tests);
 
    return tot_errors;
+}
+
+
+int test_read_file(int *tot_tests){
+
+   Cell c[HEIGHT][WIDTH];
+   int i, j, fail= 0, num=0x80;
+
+   /* I've created a test binary file that
+    goes from 0x80 to 0xff and all over again*/
+   read_file("readFileTest.m7.txt", c);
+   for (i=0; i<HEIGHT; i++){
+      for (j=0; j<WIDTH; j++){
+         if (num == 256){
+            num = 0x80;
+         }
+         if((int) c[i][j].character != num++){
+            fail++;
+         }
+      }
+   }
+   if (fail ==  0){
+      printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "read_file", GRNSTR, WHITESTR );
+      return PASS;
+   }
+   else{
+      printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "read_file", REDSTR, WHITESTR );
+      /* I am going to use exit(1), because I will use the 'read_file' function
+       in an other test case, and want to make sure that I use it only if it works*/
+      exit (1);
+   }
+}
+
+int test_set_board(int *tot_tests){
+
+   Cell c[HEIGHT][WIDTH];
+   int fail=0, i, j;
+
+   /*I will use the 'read_file' function that is already tested*/
+   read_file("readFileTest.m7.txt", c);
+
+   /* The file I read goes from 0x80 to 0xff and all over again*/
+   /* So I know what to expect. Now I'm going to check random cells*/
+   set_board(c);
+   if (c[0][2].character != SPACE){/*0x82*/
+      fail++;
+   }
+   if (c[1][25].character != 'A' + VISABLE_ASCII){/*0xc1*/
+      fail++;
+   }
+   if (c[0][17].Mode != Graphics){/*0x91*/
+      fail++;
+   }
+   if (c[0][13].Height != Double){/*0x8d*/
+      fail++;
+   }
+
+   if (fail == 0){
+      printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "set_board", GRNSTR, WHITESTR );
+      return PASS;
+   }
+   else{
+      printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "set_board", REDSTR, WHITESTR );
+      /* I am going to use exit(1), because I will use the 'set_board' function
+       in an other test case, and want to make sure that I use it only if it works*/
+      exit (1);
+   }
+}
+
+int test_print_board(int *tot_tests){
+
+   Cell c[HEIGHT][WIDTH];
+   int result, i, j;
+
+   /*I will use the 'read_file' function that is already tested*/
+   read_file("readFileTest.m7.txt", c);
+   /*I will use the 'set_board' function that is already tested*/
+   set_board(c);
+   popup(BOARD_START);
+   print_board(c);
+   result = popup(FINISH);
+
+
+   if (result == 'y'){
+      printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "print_board", GRNSTR, WHITESTR );
+      return PASS;
+   }
+   else{
+      printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "print_board", REDSTR, WHITESTR );
+      return FAIL;
+   }
 }
 
 int test_new_line_settings(int *tot_tests){
@@ -353,17 +445,18 @@ int test_event_handling(int *tot_tests, Window testWin){
    return PASS;
 }
 
-void popup(){
+int popup(int test){
 
    Window popUp;
    fntrow fontdata[FNTCHARS][FNTHEIGHT];
    int line=0, button=0;
 
    read_font(fontdata, FNTFILENAME);
+   SDL_Init(SDL_INIT_EVERYTHING);
    popUp.win= SDL_CreateWindow("popup message",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
-                          600, 300,
+                          800, 300,
                           SDL_WINDOW_SHOWN);
 
    popUp.renderer = SDL_CreateRenderer(popUp.win, -1, 0);
@@ -371,17 +464,32 @@ void popup(){
    SDL_RenderClear(popUp.renderer);
    SDL_RenderPresent(popUp.renderer);
 
-   DrawString(&popUp, fontdata,"Expected result from next test:", 0, FNTHEIGHT * ++line);
-   DrawString(&popUp, fontdata,"to draw a black window named ", 0, FNTHEIGHT * ++line);
-   DrawString(&popUp, fontdata,"Vlasis' Teletext with size: 640x450", 0, FNTHEIGHT * ++line);
-   DrawString(&popUp, fontdata,"     if ready press space", 0, 250);
+   switch (test) {
+      case WINDOW:
+         DrawString(&popUp, fontdata,"Expected result from next test:", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"to draw a black window named ", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"Vlasis' Teletext with size: 640x450", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"     if ready press space", 0, 250);
+         break;
+      case BOARD_START:
+         DrawString(&popUp, fontdata,"Expected result from next test:", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"draw a board with characters from ", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"0x80 to 0xff and all over again in ", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"in the appropriate manner ", 0, FNTHEIGHT * ++line);
+         DrawString(&popUp, fontdata,"     if ready press space", 0, 250);
+         break;
+      case FINISH:
+         DrawString(&popUp, fontdata,"was the test successful? y/n", 0, FNTHEIGHT * ++line);
+      break;
+   }
    SDL_RenderPresent(popUp.renderer);
    SDL_UpdateWindowSurface(popUp.win);
    do{
       event_handling(&button);
-   }while(button != SPACE);
+   }while((button!=SPACE) && (button!='y') && (button!='n'));
    SDL_DestroyWindow(popUp.win);
    SDL_Quit();
+   return button;
 }
 
 int test_init_window( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
@@ -389,21 +497,17 @@ int test_init_window( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    Window testWin;
    int button=0, result=0;
 
-   popup();
+   popup(WINDOW);
    init_window(&testWin);
    SDL_Delay(3000);
-   DrawString(&testWin, fontdata, "did the window appear? y/n", 0, 400);
-   SDL_RenderPresent(testWin.renderer);
-   do{
-      event_handling(&button);
-   }while((button != 'y') && (button != 'n'));
+   result = popup(FINISH);
    SDL_DestroyWindow(testWin.win);
    SDL_Quit();
-   if (button == 'n'){
+   if (result == 'n'){
       printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "init_window", REDSTR, WHITESTR );
       return FAIL;
    }
-   else if(button == 'y'){
+   else if(result == 'y'){
       printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "init_window", GRNSTR, WHITESTR );
       return PASS;
    }
@@ -418,6 +522,7 @@ int test_select_colour( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    testRect.x = 400; testRect.y = 100;
    testRect.w = 80; testRect.h = 80;
 
+   SDL_Init(SDL_INIT_EVERYTHING);
    testWin.win= SDL_CreateWindow("select colour",
                          SDL_WINDOWPOS_UNDEFINED,
                          SDL_WINDOWPOS_UNDEFINED,
@@ -461,6 +566,7 @@ int test_light_pixel( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    Window testWin;
    int line=0, button=0;
 
+   SDL_Init(SDL_INIT_EVERYTHING);
    testWin.win= SDL_CreateWindow("light pixel",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
@@ -512,6 +618,7 @@ int test_Vlasis_draw_rect(int *tot_tests,fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    int button=0, line=0;
 
    testCell.foreColour = BLUE;
+   SDL_Init(SDL_INIT_EVERYTHING);
    testWin.win= SDL_CreateWindow("Vlasis draw rect",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
@@ -569,9 +676,9 @@ int test_Vlasis_draw_rect(int *tot_tests,fntrow fontdata[FNTCHARS][FNTHEIGHT]){
 }
 
 /*in this function I also test draw_background and draw_foreground functions*/
-int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
+int test_draw_cell(int *tot_tests, int *tot_errors, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
 
-   int x=0, y=0, button=0;
+   int x=0, y=0, button=0, errors=0;
    Window testWin;
    Cell testCell;
 
@@ -579,6 +686,7 @@ int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    testCell.foreColour = BLUE;
    testCell.character = 'A' + VISABLE_ASCII;
 
+   SDL_Init(SDL_INIT_EVERYTHING);
    testWin.win= SDL_CreateWindow("draw_cell",
                           SDL_WINDOWPOS_UNDEFINED,
                           SDL_WINDOWPOS_UNDEFINED,
@@ -603,6 +711,7 @@ int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
       event_handling(&button);
    }while((button != 'y') && (button != 'n'));
    if (button == 'n'){
+      errors++;
       printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "draw_background", REDSTR, WHITESTR );
    }
    else if(button == 'y'){
@@ -616,6 +725,7 @@ int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
       event_handling(&button);
    }while((button != 'y') && (button != 'n'));
    if (button == 'n'){
+      errors++;
       printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "draw_foreground", REDSTR, WHITESTR );
    }
    else if(button == 'y'){
@@ -636,10 +746,11 @@ int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]){
    SDL_Quit();
    if (button == 'n'){
       printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "draw_Cell", REDSTR, WHITESTR );
-      return FAIL;
+      return ++errors;
    }
    else if(button == 'y'){
       printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "draw_Cell", GRNSTR, WHITESTR );
-      return PASS;
+      return errors;
    }
+   /*I return errors instead of PASS/FAIL cause I have more than one test*/
 }

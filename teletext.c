@@ -13,17 +13,14 @@ int main(int argc, char *argv[])
       exit(1);
    }
    if (test() != 0 ){
-      printf("Testing failed\n\n\n");
+      fprintf(stderr,"Testing failed\n\n\n");
       exit (1);
    }
-   /*
-read_file(argv[1], board);
-set_board(board);
-print_board(board);
-   */
+   read_file(argv[1], board);
+   set_board(board);
+   print_board(board);
    return 0;
 }
-
 
 void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
 
@@ -34,7 +31,7 @@ void read_file(char *fileName, Cell board[HEIGHT][WIDTH]){
    fp = fopen(fileName, "rb");
 
    if (fp == NULL){
-      fprintf(stderr, "Can't open Font file %s\n", fileName);
+      fprintf(stderr, "Can't open this file %s\n", fileName);
       exit(1);
    }
    for (i=0; i<HEIGHT; i++){
@@ -72,7 +69,6 @@ void set_board( Cell board[HEIGHT][WIDTH]){
    }
 }
 
-/* done */
 Cell set_pixels_zero( Cell c){
 
    c.pixel.l_top = 0;
@@ -95,7 +91,6 @@ Cell new_line_settings( Cell c, Cell *prev){
    return c;
 }
 
-/* done */
 Cell exam_cases(Cell c, Cell *prev){
 
    if (c.character == SINGLE){
@@ -128,7 +123,6 @@ Cell exam_cases(Cell c, Cell *prev){
    return c;
 }
 
-/* done */
 Cell set_current_cell(Cell c, Cell *prev, unsigned char *last_graph){
 
    c.Held_graph =  prev->Held_graph;
@@ -141,7 +135,6 @@ Cell set_current_cell(Cell c, Cell *prev, unsigned char *last_graph){
    return c;
 }
 
-/* done */
 Cell set_foreground(Cell c, int *prevFore){
 
    /* new text colour*/
@@ -160,7 +153,6 @@ Cell set_foreground(Cell c, int *prevFore){
    return c;
 }
 
-/* done */
 Cell set_background(Cell c , int *prevBack, int prevFore){
 
    if ( c.character == BLACKBACKGROUND){
@@ -178,7 +170,6 @@ Cell set_background(Cell c , int *prevBack, int prevFore){
    return c;
 }
 
-/*DONE*/
 Cell set_character(Cell c, unsigned char *last_graph){
 
    /*so we don't print the control codes*/
@@ -204,7 +195,6 @@ Cell set_character(Cell c, unsigned char *last_graph){
    return c;
 }
 
-/*DONE*/
 Cell encode_graphics(Cell old, unsigned char chr){
 
    Cell c = old;
@@ -256,14 +246,13 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    }
 
    SDL_UpdateWindowSurface(sw.win);
-   while (button != ESCAPE){
+   while ((button != ESCAPE) && (button != SPACE)){
       event_handling(&button);
    }
    SDL_DestroyWindow(sw.win);
    SDL_Quit();
 }
 
-/*DONE*/
 void init_window(Window *sw){
 
    sw->win= SDL_CreateWindow("Vlasis' Teletext",
@@ -289,7 +278,6 @@ void init_window(Window *sw){
    SDL_RenderPresent(sw->renderer);
 }
 
- /*den 8a to testarw kai na to grapsw sto .txt file*/
 void read_font(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 
    FILE *fp = fopen(fname, "rb");
@@ -332,7 +320,6 @@ void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, 
    }
 }
 
- /* done */
 void draw_background(Window *sw, int colour, int x, int y){
 
    int i, j;
@@ -356,7 +343,6 @@ void draw_foreground(Window *sw, Cell c, int x, int y, int i){
    }
 }
 
-/* done */
 void select_colour( Window *sw, int colour ){
 
    switch (colour) {
@@ -388,7 +374,6 @@ void select_colour( Window *sw, int colour ){
 
 }
 
-/* done */
 void Vlasis_draw_rect(Window *sw, Cell c, int y, int x){
 
    if( c.pixel.l_top == ACTIVE){
@@ -412,7 +397,6 @@ void Vlasis_draw_rect(Window *sw, Cell c, int y, int x){
 
 }
 
-/* done */
 void light_pixel(Window *sw, int y, int x, int colour, int type){
 
    SDL_Rect rect;
@@ -434,7 +418,8 @@ void light_pixel(Window *sw, int y, int x, int colour, int type){
       exit(1);
    }
 }
-/* done*/
+
+
 int event_handling(int *button){
 
    SDL_Event event;
