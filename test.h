@@ -35,11 +35,17 @@ void DrawString(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], char *str, int
    }while(str[i]);
 }
 void popup();
-int did_test_passed();
 
+int test_exam_cases(int *tot_tests);
+int test_set_current_cell(int *tot_tests);
+int test_set_foreground(int *tot_tests);
+int test_set_background(int *tot_tests);
+int test_set_character(int *tot_tests);
+int test_encode_graphics(int *tot_tests);
+int test_set_pixels_zero(int *tot_tests);
 int test_event_handling(int *tot_tests, Window testWin);
-int test_init_window( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
-int test_select_colour( int *tot_tests);
-int test_light_pixel(int *tot_tests);
-int test_Vlasis_draw_rect(int *tot_tests);
-int test_draw_background(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
+int test_init_window( int *tot_tests,  fntrow fontdata[FNTCHARS][FNTHEIGHT]);
+int test_select_colour( int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
+int test_light_pixel(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
+int test_Vlasis_draw_rect(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
+int test_draw_cell(int *tot_tests, fntrow fontdata[FNTCHARS][FNTHEIGHT]);
