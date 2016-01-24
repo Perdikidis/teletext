@@ -36,6 +36,7 @@ void DrawString(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], char *str, int
 }
 void popup();
 
+int test_new_line_settings(int *tot_tests);
 int test_exam_cases(int *tot_tests);
 int test_set_current_cell(int *tot_tests);
 int test_set_foreground(int *tot_tests);

@@ -11,6 +11,7 @@ int test(void)
 
    read_font(fontdata, FNTFILENAME);
    printf("\n\nTESTING!!!!\n\n\n");
+   tot_errors += test_new_line_settings(&tot_tests);
 
    /*
    tot_errors += test_exam_cases(&tot_tests);
@@ -33,12 +34,47 @@ int test(void)
    return tot_errors;
 }
 
+int test_new_line_settings(int *tot_tests){
+
+   Cell c, prev;
+   int fail=0;
+
+   c = new_line_settings(c, &prev);
+   if((c.Height != prev.Height) || (c.Height != Single)){
+      fail++;
+   }
+   if((c.foreColour != prev.foreColour) || (c.foreColour != WHITE)){
+      fail++;
+   }
+   if((c.backColour != prev.backColour) || (c.backColour != BLACK)){
+      fail++;
+   }
+   if((c.Mode != prev.Mode) || (c.Mode != Alphanumeric)){
+      fail++;
+   }
+   if((c.Type != prev.Type) || (c.Type != Contiguous)){
+      fail++;
+   }
+   if((c.Held_graph != prev.Held_graph) || (c.Held_graph != No)){
+      fail++;
+   }
+
+   if (fail == 0){
+      printf("%d. %23s %sPASS%s\n",  ++*tot_tests, "new_line_settings", GRNSTR, WHITESTR );
+      return PASS;
+   }
+   else{
+      printf("%d. %23s %sFAIL%s\n", ++*tot_tests, "new_line_settings", REDSTR, WHITESTR );
+      return FAIL;
+   }
+}
+
 int test_exam_cases(int *tot_tests){
 
    Cell c, prev;
    int fail=0;
 
-   /*will run tests for all 7 cases*/
+   /*will test all 7 cases*/
    c.character = SINGLE;
    c = exam_cases(c, &prev);
    if((c.Height != prev.Height) || (c.Height != Single) ||
