@@ -4,7 +4,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_image.h>
+
 
 #define DIST_GRAPH_TO_ALPHA 16
 #define HEIGHT 25
