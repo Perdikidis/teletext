@@ -15,7 +15,9 @@ clean:
 	rm -f $(TARGET)
 
 run: all
-	./$(TARGET) test.m7.txt
+	./$(TARGET) lfc.m7.txt
+
+
 
 
 push:

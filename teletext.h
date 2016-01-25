@@ -27,7 +27,7 @@
 /* Font stuff */
 typedef unsigned short fntrow;
 
-#define FNTFILENAME "m7fixed.fnt"
+#define FNTFILENAME (char *)"m7fixed.fnt"
 #define FNTWIDTH 16
 #define FNTHEIGHT 18
 #define FNTCHARS 96

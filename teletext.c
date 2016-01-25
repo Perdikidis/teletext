@@ -12,10 +12,12 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
+   /*
    if (test() != 0 ){
-      fprintf(stderr,"Testing failed\n\n\n");
+      printf("Testing failed\n\n\n");
       exit (1);
    }
+   */
    read_file(argv[1], board);
    set_board(board);
    print_board(board);
@@ -231,11 +233,10 @@ void print_board(Cell board[HEIGHT][WIDTH]){
    }
    init_window(&sw);
    read_font(fontdata, FNTFILENAME);
-
    for (i=0; i<HEIGHT; i++){
       for (j=0; j<WIDTH; j++){
          height_of_above = board[i-1][j].Height;
-         y = FNTHEIGHT*i; x = j*FNTWIDTH;
+         y = FNTHEIGHT * i;     x = j * FNTWIDTH;
          draw_cell(&sw, fontdata, board[i][j], x, y, height_of_above);
          if (board[i][j].Mode == Graphics){
             Vlasis_draw_rect(&sw, board[i][j], y, x);
@@ -244,8 +245,6 @@ void print_board(Cell board[HEIGHT][WIDTH]){
          SDL_Delay(5);
       }
    }
-
-   SDL_UpdateWindowSurface(sw.win);
    while ((button != ESCAPE) && (button != SPACE)){
       event_handling(&button);
    }
@@ -273,8 +272,16 @@ void init_window(Window *sw){
       exit(1);
    }
    /*set screen black*/
-   SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
-   SDL_RenderClear(sw->renderer);
+   if(SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE) != 0){
+      fprintf(stderr, "\nUnable to draw colour:  %s\n", SDL_GetError());
+      SDL_Quit();
+      exit(1);
+   }
+   if(SDL_RenderClear(sw->renderer) !=0 ){
+      fprintf(stderr, "\nUnable to clear render:  %s\n", SDL_GetError());
+      SDL_Quit();
+      exit(1);
+   }
    SDL_RenderPresent(sw->renderer);
 }
 
@@ -326,52 +333,65 @@ void draw_background(Window *sw, int colour, int x, int y){
    for(i = 0; i < FNTHEIGHT; i++){
       for(j = 0; j < FNTWIDTH; j++){
          select_colour(sw, colour);
-         SDL_RenderDrawPoint(sw->renderer, x + j, y + i);
+         if(SDL_RenderDrawPoint(sw->renderer, x + j, y + i) != 0){
+            fprintf(stderr, "\nUnable to draw point:  %s\n", SDL_GetError());
+            SDL_Quit();
+            exit(1);
+         }
       }
    }
 }
 
 void draw_foreground(Window *sw, Cell c, int x, int y, int i){
 
+   int error=0;
+
    select_colour(sw, c.foreColour);
    if (c.Height == Single){
-      SDL_RenderDrawPoint(sw->renderer, x , y + i );
+      error += SDL_RenderDrawPoint(sw->renderer, x , y + i );
    }
    else{
-      SDL_RenderDrawPoint(sw->renderer, x , y + i*2);
-      SDL_RenderDrawPoint(sw->renderer, x , y +  i*2+1);
+      error += SDL_RenderDrawPoint(sw->renderer, x , y + i*2);
+      error += SDL_RenderDrawPoint(sw->renderer, x , y +  i*2+1);
+   }
+   if(error != 0){
+      fprintf(stderr,"unable to draw point");
    }
 }
 
 void select_colour( Window *sw, int colour ){
 
+   int error=0;
+
    switch (colour) {
       case RED:                             /* R   G  B */
-         SDL_SetRenderDrawColor(sw->renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 255, 0, 0, SDL_ALPHA_OPAQUE);
          break;
       case GREEN:
-         SDL_SetRenderDrawColor(sw->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
          break;
       case YELLOW:
-         SDL_SetRenderDrawColor(sw->renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 255, 255, 0, SDL_ALPHA_OPAQUE);
          break;
       case BLUE:
-         SDL_SetRenderDrawColor(sw->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
          break;
       case MAGENTA:
-         SDL_SetRenderDrawColor(sw->renderer, 255, 0, 127, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 255, 0, 127, SDL_ALPHA_OPAQUE);
          break;
       case CYAN:
-         SDL_SetRenderDrawColor(sw->renderer, 0, 255, 255, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 0, 255, 255, SDL_ALPHA_OPAQUE);
          break;
       case WHITE:
-         SDL_SetRenderDrawColor(sw->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
          break;
       case BLACK:
-         SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
          break;
    }
-
+   if(error !=0){
+      fprintf(stderr, "unable to render draw colour");
+   }
 }
 
 void Vlasis_draw_rect(Window *sw, Cell c, int y, int x){
@@ -400,7 +420,7 @@ void Vlasis_draw_rect(Window *sw, Cell c, int y, int x){
 void light_pixel(Window *sw, int y, int x, int colour, int type){
 
    SDL_Rect rect;
-   int pixel_w = PIXEL_W , pixel_h = PIXEL_H, return_value;
+   int pixel_w = PIXEL_W , pixel_h = PIXEL_H;
 
    if (type == Separated){
       pixel_h -=  PIXEL_DISTANCE;
@@ -411,14 +431,12 @@ void light_pixel(Window *sw, int y, int x, int colour, int type){
    rect.w = pixel_w;
    rect.h = pixel_h;
    select_colour(sw, colour);
-   return_value = SDL_RenderFillRect( sw->renderer, &rect);
-   if(return_value != 0){
+   if(SDL_RenderFillRect( sw->renderer, &rect) != 0){
       fprintf(stderr, "\nUnable to fill rect: %s\n", SDL_GetError());
       SDL_Quit();
       exit(1);
    }
 }
-
 
 int event_handling(int *button){
 
