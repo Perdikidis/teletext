@@ -8,12 +8,6 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
-   /*
-   if (test() != 0 ){
-      printf("Testing failed\n\n\n");
-      exit (1);
-   }
-   */
    read_file(argv[1], board);
    set_board(board);
    print_board(board);

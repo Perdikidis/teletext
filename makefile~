@@ -1,27 +1,17 @@
 CFLAGS = `pkg-config sdl2 --cflags` -O4 -Wall -Wextra -Wfloat-equal -pedantic -std=c89 -lm
-INCS = teletext_extention.h test.h
-TARGET = teletext_extention
-SOURCES = $(TARGET).c
 LIBS =  `pkg-config sdl2 --libs`
 CC = gcc
 
 
-all: $(TARGET)
+teletext: teletext.c teletext.h
+	$(CC) teletext.c -o teletext $(CFLAGS) $(LIBS)
 
-$(TARGET): test.c $(SOURCES) $(INCS)
-	$(CC) test.c $(SOURCES) -o $(TARGET) $(CFLAGS) $(LIBS)
+test:  test.c teletext.c teletext.h test.h
+	$(CC) test.c teletext.c -o test $(CFLAGS) $(LIBS)
 
-clean:
-	rm -f $(TARGET)
 
-run: all
-	./$(TARGET) demo8.m7.txt
-
+extension: teletext_extension.c teletext_extension.h
+	$(CC) teletext_extension.c -o extension $(CFLAGS) $(LIBS)
 
 
 
-push:
-	git commit -a -m $$(date +%d-%m-%Y/%H:%M)
-	git push
-pull:
-	git pull
