@@ -15,7 +15,7 @@ clean:
 	rm -f $(TARGET)
 
 run: all
-	./$(TARGET) demo5.m7.txt
+	./$(TARGET) demo8.m7.txt
 
 
 
