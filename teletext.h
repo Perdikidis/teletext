@@ -18,7 +18,7 @@
 #define NEWBACKGROUND 0x9D
 #define HOLD_GRAPHICS 0x9E
 #define RELEASE_GRAPHICS 0x9F
-#define SPACE 0xa0
+#define SPACE 0xA0
 #define BASECODE 160
 #define ACTIVE 1
 #define VISABLE_ASCII 128
@@ -26,12 +26,12 @@
 
 /* Font stuff */
 typedef unsigned short fntrow;
-
 #define FNTFILENAME (char *)"m7fixed.fnt"
 #define FNTWIDTH 16
 #define FNTHEIGHT 18
 #define FNTCHARS 96
 #define FNT1STCHAR 32
+/* Window/pixel */
 #define PIXEL_H FNTHEIGHT/3
 #define PIXEL_W FNTWIDTH/2
 #define PIXEL_DISTANCE 2
@@ -69,7 +69,7 @@ typedef struct window {
 int test();
 void read_file (char *filename, Cell board[HEIGHT][WIDTH]);
 void set_board( Cell board[HEIGHT][WIDTH]);
-Cell set_pixels_zero( Cell c);/*DONE*/
+Cell set_pixels_zero( Cell c);
 Cell new_line_settings( Cell c, Cell *prev);
 Cell exam_cases(Cell c, Cell *prev);
 Cell set_current_cell(Cell c, Cell *prev, unsigned char *last_graph);
@@ -78,13 +78,13 @@ Cell set_background(Cell c , int *prevBack, int prevFore);
 Cell set_character(Cell c, unsigned char *last_graph);
 Cell encode_graphics(Cell old, unsigned char chr);
 void print_board(Cell board[HEIGHT][WIDTH]);
-void init_window(Window *sw);/* DONE */
+void init_window(Window *sw);
 void read_font(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname);
 void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int ox, int oy, int above_height);
 void draw_background(Window *sw, int colour, int x, int y);
-void draw_foreground(Window *sw, Cell c, int x, int y, int i);
-void select_colour( Window *sw, int colour );/* DONE */
+void draw_foreground(Window *sw, Cell c, int x, int j, int y, int i);
+void select_colour( Window *sw, int colour );
 void set_colour(Window *sw, Uint8 r, Uint8 g, Uint8 b);
-void Vlasis_draw_rect(Window *sw, Cell c, int y, int x);/*DONE*/
-void light_pixel(Window *sw, int y, int x, int colour, int type);/*DONE*/
+void Vlasis_draw_rect(Window *sw, Cell c, int y, int x);
+void light_pixel(Window *sw, int y, int x, int colour, int type);
 int event_handling(int *button);

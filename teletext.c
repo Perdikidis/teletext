@@ -1,7 +1,3 @@
-/* na dw ti epistrefei ka8e function kai ka8e entolh tou SDL.. px. draw_rect*/
-/* MAGIC NUMBERS STO encode_graphics*/
-/* na kanw vlagrid*/
-/*add key input instead of sdl delay*/
 #include "teletext.h"
 
 int main(int argc, char *argv[])
@@ -12,10 +8,12 @@ int main(int argc, char *argv[])
       fprintf(stderr,"you need to give 2 arguments\n");
       exit(1);
    }
+   /*
    if (test() != 0 ){
       printf("Testing failed\n\n\n");
       exit (1);
    }
+   */
    read_file(argv[1], board);
    set_board(board);
    print_board(board);
@@ -302,24 +300,22 @@ void read_font(fntrow fontdata[FNTCHARS][FNTHEIGHT], char *fname){
 void draw_cell(Window *sw, fntrow fontdata[FNTCHARS][FNTHEIGHT], Cell c, int x, int y, int height_of_above){
 
    unsigned char chr = c.character - VISABLE_ASCII;
-   int i=0, j=0, cell_height = FNTHEIGHT, cell_width = FNTWIDTH;
+   int i=0, j, height_to_draw = FNTHEIGHT, width_to_draw = FNTWIDTH;
 
    draw_background(sw, c.backColour, x, y);
-
    /* and now the foreground */
    if (c.Height == Double){
+      height_to_draw /= 2;
       if ( height_of_above == Double){
-         i = cell_height/2;/*only print the letter's bottom half*/
-         y -= cell_height;/*shift the half upwards*/
-      }
-      else{
-         cell_height /= 2;/*print only the letter's top half*/
+         i = height_to_draw;/*set starting point in the mid of letter*/
+         height_to_draw += i; /* set ending point*/
+         y -= FNTHEIGHT; /*shift the half upwards*/
       }
    }
-   for( ; i < cell_height; i++){
-      for(j = 0; j < cell_width; j++){
-         if(fontdata[chr-FNT1STCHAR][i] >> (cell_width - 1 - j) & 1){
-            draw_foreground(sw, c, x+j, y, i);
+   for( ; i < height_to_draw; i++){
+      for(j=0 ; j < width_to_draw; j++){
+         if(fontdata[chr-FNT1STCHAR][i] >> (FNTWIDTH - 1 - j) & 1){
+            draw_foreground(sw, c, x, j, y, i);
          }
       }
    }
@@ -340,17 +336,17 @@ void draw_background(Window *sw, int colour, int x, int y){
    }
 }
 
-void draw_foreground(Window *sw, Cell c, int x, int y, int i){
+void draw_foreground(Window *sw, Cell c, int x, int j, int y, int i){
 
    int error=0;
 
    select_colour(sw, c.foreColour);
    if (c.Height == Single){
-      error += SDL_RenderDrawPoint(sw->renderer, x , y + i );
+      error += SDL_RenderDrawPoint(sw->renderer, x + j , y + i );
    }
    else{
-      error += SDL_RenderDrawPoint(sw->renderer, x , y + i*2);
-      error += SDL_RenderDrawPoint(sw->renderer, x , y +  i*2+1);
+      error += SDL_RenderDrawPoint(sw->renderer, x + j, y + i*2);
+      error += SDL_RenderDrawPoint(sw->renderer, x + j, y +  i*2+1);
    }
    if(error != 0){
       fprintf(stderr,"unable to draw point");
@@ -375,7 +371,7 @@ void select_colour( Window *sw, int colour ){
          error += SDL_SetRenderDrawColor(sw->renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
          break;
       case MAGENTA:
-         error += SDL_SetRenderDrawColor(sw->renderer, 255, 0, 127, SDL_ALPHA_OPAQUE);
+         error += SDL_SetRenderDrawColor(sw->renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
          break;
       case CYAN:
          error += SDL_SetRenderDrawColor(sw->renderer, 0, 255, 255, SDL_ALPHA_OPAQUE);
